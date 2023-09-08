@@ -1,3 +1,5 @@
+This is a wordpress app in docker
+
 To take advantage of concurrency runs of docker compose, we need to export two environment variables. Do that by running the commands below:
     For Windows Command Prompt:
     set DOCKER_BUILDKIT=1
