@@ -1,16 +1,17 @@
 terraform {
+  //This backend was already created in a different project: https://github.com/nicktsan/aws_backend
   backend "s3" {
     bucket               = "movies-terraform-backend"
     key                  = "terraform.tfstate"
-    region               = var.region
+    region               = "us-east-1"
     workspace_key_prefix = "wordpress"
     dynamodb_table       = "movies-db-backend"
     encrypt              = true
   }
 
-  required_providers {
+  /*required_providers {
     cloudflare = {
       source = "cloudflare/cloudflare"
     }
-  }
+  }*/
 }

@@ -1,19 +1,26 @@
 resource "aws_rds_cluster" "wordpress" {
   cluster_identifier = "wordpress-cluster"
   engine             = "aurora-mysql"
-  /*refer to https://docs.aws.amazon.com/AmazonRDS/latest/AuroraMySQLReleaseNotes/AuroraMySQL.Updates.30Updates.html
-    for the latest database engine updates for Amazon Aurora MySQL version 3*/
-  engine_version = "8.0.mysql_aurora.3.04.0"
-  #refers to data.tf for availability zones
-  availability_zones = data.aws_availability_zones.zones.names
+  //To see which versions are available in serverless mode, run this:
+  //aws rds describe-db-engine-versions --engine aurora-mysql --filters Name=engine-mode,Values=serverless
+  //And if you want to understand which DB versions are available according to the engine mode, just remove the filter:
+  //aws rds describe-db-engine-versions --engine aurora-mysql
+  engine_version = "5.7.mysql_aurora.2.08.3"
+  //refers to data.tf for availability zones
+  //data.aws_availability_zones.zones.names returns a list of availibility zones. Since we can only
+  //have up to 3, we will sort the list, then take the first 3 elements
+  availability_zones = slice(sort(data.aws_availability_zones.zones.names), 0, 2)
   #Use AWS Parameter Store to store the values of database_name, master_username, and master_password
   #aws_ssm_parameter refers to the resources below this one
-  database_name          = aws_ssm_parameter.dbname.value
-  master_username        = aws_ssm_parameter.dbuser.value
-  master_password        = aws_ssm_parameter.dbpassword.value
-  db_subnet_group_name   = aws_db_subnet_group.dbsubnet.id
-  engine_mode            = "serverless"
-  vpc_security_group_ids = [aws_security_group.rds_secgrp.id]
+  database_name             = aws_ssm_parameter.dbname.value
+  master_username           = aws_ssm_parameter.dbuser.value
+  master_password           = aws_ssm_parameter.dbpassword.value
+  db_subnet_group_name      = aws_db_subnet_group.dbsubnet.id
+  engine_mode               = "serverless"
+  vpc_security_group_ids    = [aws_security_group.rds_secgrp.id]
+  skip_final_snapshot       = false
+  final_snapshot_identifier = "finalSnapshot"
+  apply_immediately         = true
 
   scaling_configuration {
     min_capacity = 1
@@ -50,8 +57,8 @@ resource "random_password" "password" {
 resource "aws_db_subnet_group" "dbsubnet" {
   name        = "wordpress-cluster-subnet"
   description = "Aurora wordpress cluster db subnet group"
-  #refers to data.tf for aws_subnet_ids
-  subnet_ids = data.aws_subnet_ids.subnets.ids
+  #refers to data.tf for aws_subnets
+  subnet_ids = data.aws_subnets.subnets.ids
   tags       = local.tags
 }
 
@@ -114,12 +121,11 @@ resource "aws_instance" "wordpress" {
   instance_type               = var.ec2_instance_type
   associate_public_ip_address = true
   #pull a singular subnet id from data.tf
-  subnet_id = sort(data.aws_subnet_ids.subnets.ids)[0]
+  subnet_id = sort(data.aws_subnets.subnets.ids)[0]
   #refers to resource aws_security_group below
   security_groups = [aws_security_group.ec2_secgrp.id]
-  /*Since we're not using a PEM file, we need to use an instance profile that will enable access via session manager.
-    This allows us to connect to the EC2 instance using session manager. 
-    Refer to https://korniichuk.medium.com/session-manager-e724eb105eb7 on how to Create AWS IAM Role*/
+  //If you already have a role with that can manage ec2 instances via session manager, you can provide the name of that
+  //instance profile for iam_instance_profile instead of creating another.
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
   user_data            = data.template_file.userdata.rendered
 

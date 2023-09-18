@@ -1,6 +1,5 @@
 server {
     listen ${external_port};
-    server_name ${url_endpoint};
     location / {
         proxy_set_header HOST \$host;
         proxy_set_header X-Forwarded-Proto \$scheme;

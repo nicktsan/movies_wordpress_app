@@ -2,8 +2,11 @@ data "aws_availability_zones" "zones" {
   state = "available"
 }
 
-data "aws_subnet_ids" "subnets" {
-  vpc_id = var.vpc_id
+data "aws_subnets" "subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
 }
 
 data "aws_vpc" "vpc" {
@@ -44,7 +47,7 @@ data "template_file" "nginx_conf" {
 
   vars = {
     external_port = var.wordpress_external_port
-    url_endpoint  = "${var.endpoint}.${var.domain}"
+    //url_endpoint  = "${var.endpoint}.${var.domain}"
   }
 }
 
