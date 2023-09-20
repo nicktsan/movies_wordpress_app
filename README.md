@@ -1,6 +1,10 @@
-This is a wordpress app in docker
+This project launches a wordpress website within an EC2 instance with Aurora SQL inside of an S3 bucket, using Cloudflare to proxy requests to the vm. The site itself is built within a docker container in the EC2 instance.
 
-
+Prerequisites:
+- Docker and docker-compose
+- AWS Account
+- Cloudflare account and registered website domain
+- S3 bucket
 
 To take advantage of concurrency runs of docker compose, we need to export two environment variables. Do that by running the commands below:
     For Windows Command Prompt:
@@ -44,3 +48,7 @@ Check if you can access the EC2 instance via session manager.
 sudo su - ubuntu
 Check if you can access docker within the EC2 instance:
 docker container ls
+
+If the docker containers are created, the wordpress site should be accessible through the public ip, public dns, or <endpoint>.<domain>.
+
+When accessing the site through <endpoint>.<domain>, check if the connection is secure through Cloudflare.

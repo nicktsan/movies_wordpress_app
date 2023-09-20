@@ -8,10 +8,10 @@ terraform {
     dynamodb_table       = "movies-db-backend"
     encrypt              = true
   }
-
-  /*required_providers {
+  //Use cloudflare to proxy requests to the vm
+  required_providers {
     cloudflare = {
       source = "cloudflare/cloudflare"
     }
-  }*/
+  }
 }

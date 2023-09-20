@@ -35,3 +35,18 @@ variable "region" {
   description = "AWS region"
   type        = string
 }
+
+variable "domain" {
+  description = "wordpress domain"
+  type        = string
+}
+
+variable "endpoint" {
+  description = "wordpress endpoint"
+  type        = string
+}
+
+variable "final_snapshot_identifier" {
+  description = "rds cluster final snapshot name"
+  type        = string
+}

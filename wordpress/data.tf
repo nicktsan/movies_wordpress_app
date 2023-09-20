@@ -47,7 +47,7 @@ data "template_file" "nginx_conf" {
 
   vars = {
     external_port = var.wordpress_external_port
-    //url_endpoint  = "${var.endpoint}.${var.domain}"
+    url_endpoint  = "${var.endpoint}.${var.domain}"
   }
 }
 
@@ -57,5 +57,17 @@ data "template_file" "userdata" {
   vars = {
     dockercompose = data.template_file.dockercompose.rendered
     nginx_conf    = data.template_file.nginx_conf.rendered
+  }
+}
+
+//Where cloudflare credentials will be stored in systems manager parameter store
+data "aws_ssm_parameter" "cloudflare_token" {
+  name = "/system/cloudflare/TOKEN"
+}
+
+
+data "cloudflare_zones" "domain" {
+  filter {
+    name = var.domain
   }
 }

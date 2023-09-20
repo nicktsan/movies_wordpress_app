@@ -19,7 +19,7 @@ resource "aws_rds_cluster" "wordpress" {
   engine_mode               = "serverless"
   vpc_security_group_ids    = [aws_security_group.rds_secgrp.id]
   skip_final_snapshot       = false
-  final_snapshot_identifier = "finalSnapshot"
+  final_snapshot_identifier = var.final_snapshot_identifier
   apply_immediately         = true
 
   scaling_configuration {
@@ -163,4 +163,12 @@ resource "aws_security_group" "ec2_secgrp" {
 
   tags = local.tags
 
+}
+//Use cloudflare to proxy requests to the vm
+resource "cloudflare_record" "wp" {
+  zone_id = data.cloudflare_zones.domain.zones[0].id
+  name    = var.endpoint
+  value   = aws_instance.wordpress.public_ip
+  type    = "A"
+  proxied = true
 }
